@@ -3,86 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>טופס פגישה - משה אליהו</title>
+    <title>לוח פגישות - משה אליהו</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .logo { display: block; margin: 0 auto 20px; max-width: 100%; }
-        form { display: flex; flex-direction: column; margin-bottom: 20px; }
-        label, input, select, button { margin-bottom: 10px; }
-        button { background-color: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
-        th { background-color: #f2f2f2; }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f0f0f0; }
+        .container { max-width: 800px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .logo { display: block; margin: 0 auto 20px; max-width: 200px; }
+        h1, h2 { text-align: center; color: #333; }
+        .appointments-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 20px; }
+        .appointment-slot { border: 1px solid #ddd; padding: 10px; border-radius: 4px; background-color: #f9f9f9; }
+        .appointment-slot.booked { background-color: #ffebee; }
+        form { display: none; margin-top: 10px; }
+        input, button { width: 100%; padding: 5px; margin-top: 5px; }
+        button { background-color: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; }
+        button:hover { background-color: #45a049; }
     </style>
 </head>
 <body>
     <div class="container">
         <img src="https://mosheeliyahu.co.il/wp-content/uploads/2023/11/%D7%9E%D7%A9%D7%94-%D7%90%D7%9C%D7%99%D7%94%D7%95-%D7%9C%D7%95%D7%92%D7%95-e1700475817150.png" alt="משה אליהו לוגו" class="logo">
-        <h1>קביעת פגישה</h1>
-        <form id="appointmentForm">
-            <label for="fullName">שם מלא:</label>
-            <input type="text" id="fullName" name="fullName" required>
-            
-            <label for="mobile">מספר נייד:</label>
-            <input type="tel" id="mobile" name="mobile" required>
-            
-            <label for="appointmentTime">שעת פגישה:</label>
-            <select id="appointmentTime" name="appointmentTime" required>
-                <option value="">בחר שעה</option>
-                <option value="09:00">09:00</option>
-                <option value="10:00">10:00</option>
-                <option value="11:00">11:00</option>
-                <option value="12:00">12:00</option>
-                <option value="13:00">13:00</option>
-                <option value="14:00">14:00</option>
-                <option value="15:00">15:00</option>
-                <option value="16:00">16:00</option>
-            </select>
-            
-            <button type="submit">שלח פרטים</button>
-        </form>
-
-        <h2>פגישות שנקבעו</h2>
-        <table id="appointmentsTable">
-            <thead>
-                <tr>
-                    <th>שם</th>
-                    <th>טלפון</th>
-                    <th>שעה</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- הפגישות יתווספו כאן -->
-            </tbody>
-        </table>
+        <h1>לוח פגישות</h1>
+        <div class="appointments-grid" id="appointmentsGrid"></div>
     </div>
 
     <script>
-        let appointments = [];
+        const appointmentSlots = [
+            '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+            '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
+        ];
 
-        document.getElementById('appointmentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('fullName').value;
-            const mobile = document.getElementById('mobile').value;
-            const time = document.getElementById('appointmentTime').value;
+        const appointments = {};
 
-            appointments.push({ name, mobile, time });
-            updateAppointmentsTable();
-            this.reset();
-            alert('הפגישה נקבעה בהצלחה!');
-        });
+        function createAppointmentSlots() {
+            const grid = document.getElementById('appointmentsGrid');
+            appointmentSlots.forEach(slot => {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'appointment-slot';
+                slotElement.innerHTML = `
+                    <h3>${slot}</h3>
+                    <p id="status-${slot}">פנוי</p>
+                    <button onclick="bookAppointment('${slot}')">קבע פגישה</button>
+                    <form id="form-${slot}" style="display:none;">
+                        <input type="text" id="name-${slot}" placeholder="שם מלא" required>
+                        <input type="tel" id="phone-${slot}" placeholder="מספר טלפון" required>
+                        <button type="submit">אשר פגישה</button>
+                    </form>
+                `;
+                grid.appendChild(slotElement);
 
-        function updateAppointmentsTable() {
-            const tbody = document.querySelector('#appointmentsTable tbody');
-            tbody.innerHTML = '';
-            appointments.forEach(app => {
-                const row = tbody.insertRow();
-                row.insertCell(0).textContent = app.name;
-                row.insertCell(1).textContent = app.mobile;
-                row.insertCell(2).textContent = app.time;
+                document.getElementById(`form-${slot}`).onsubmit = (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById(`name-${slot}`).value;
+                    const phone = document.getElementById(`phone-${slot}`).value;
+                    confirmAppointment(slot, name, phone);
+                };
             });
         }
+
+        function bookAppointment(slot) {
+            document.getElementById(`form-${slot}`).style.display = 'block';
+        }
+
+        function confirmAppointment(slot, name, phone) {
+            appointments[slot] = { name, phone };
+            updateSlotDisplay(slot);
+        }
+
+        function updateSlotDisplay(slot) {
+            const slotElement = document.querySelector(`.appointment-slot:has(h3:contains('${slot}'))`);
+            const statusElement = document.getElementById(`status-${slot}`);
+            const formElement = document.getElementById(`form-${slot}`);
+            const bookButton = slotElement.querySelector('button');
+
+            if (appointments[slot]) {
+                statusElement.textContent = `תפוס: ${appointments[slot].name}`;
+                slotElement.classList.add('booked');
+                formElement.style.display = 'none';
+                bookButton.style.display = 'none';
+            } else {
+                statusElement.textContent = 'פנוי';
+                slotElement.classList.remove('booked');
+                bookButton.style.display = 'block';
+            }
+        }
+
+        createAppointmentSlots();
     </script>
 </body>
 </html>
