@@ -5,54 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>טופס פגישה - משה אליהו</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .logo {
-            display: block;
-            margin: 0 auto 20px;
-            max-width: 100%;
-            height: auto;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-        label {
-            margin-top: 10px;
-        }
-        input, select {
-            margin-bottom: 15px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .logo { display: block; margin: 0 auto 20px; max-width: 100%; }
+        form { display: flex; flex-direction: column; margin-bottom: 20px; }
+        label, input, select, button { margin-bottom: 10px; }
+        button { background-color: #4CAF50; color: white; border: none; padding: 10px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: right; }
+        th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
@@ -67,18 +28,61 @@
             <input type="tel" id="mobile" name="mobile" required>
             
             <label for="appointmentTime">שעת פגישה:</label>
-            <input type="time" id="appointmentTime" name="appointmentTime" required>
+            <select id="appointmentTime" name="appointmentTime" required>
+                <option value="">בחר שעה</option>
+                <option value="09:00">09:00</option>
+                <option value="10:00">10:00</option>
+                <option value="11:00">11:00</option>
+                <option value="12:00">12:00</option>
+                <option value="13:00">13:00</option>
+                <option value="14:00">14:00</option>
+                <option value="15:00">15:00</option>
+                <option value="16:00">16:00</option>
+            </select>
             
             <button type="submit">שלח פרטים</button>
         </form>
+
+        <h2>פגישות שנקבעו</h2>
+        <table id="appointmentsTable">
+            <thead>
+                <tr>
+                    <th>שם</th>
+                    <th>טלפון</th>
+                    <th>שעה</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- הפגישות יתווספו כאן -->
+            </tbody>
+        </table>
     </div>
 
     <script>
+        let appointments = [];
+
         document.getElementById('appointmentForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('הטופס נשלח בהצלחה!');
-            // כאן תוכל להוסיף קוד לשליחת הנתונים לשרת
+            const name = document.getElementById('fullName').value;
+            const mobile = document.getElementById('mobile').value;
+            const time = document.getElementById('appointmentTime').value;
+
+            appointments.push({ name, mobile, time });
+            updateAppointmentsTable();
+            this.reset();
+            alert('הפגישה נקבעה בהצלחה!');
         });
+
+        function updateAppointmentsTable() {
+            const tbody = document.querySelector('#appointmentsTable tbody');
+            tbody.innerHTML = '';
+            appointments.forEach(app => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = app.name;
+                row.insertCell(1).textContent = app.mobile;
+                row.insertCell(2).textContent = app.time;
+            });
+        }
     </script>
 </body>
 </html>
